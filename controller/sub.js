@@ -15,7 +15,7 @@ exports.create = async (req, res) => {
       res.status(400).send("Sub Failed");
     } else {
       console.log(result);
-      res.status(201).send("Sub created..");
+      res.status(201).send(result);
     }
   });
   console.log(Sub);
