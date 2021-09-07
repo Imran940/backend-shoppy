@@ -38,6 +38,12 @@ const productSchema = new mongoose.Schema(
         ref: "Sub",
       },
     ],
+    selectedSubs: [
+      {
+        type: ObjectId,
+        ref: "Sub",
+      },
+    ],
     quantity: Number,
     sold: {
       type: Number,
@@ -66,12 +72,12 @@ const productSchema = new mongoose.Schema(
       type: Array,
       default: ["Apple", "Samsung", "Microsoft", "Lenovo", "Asus"],
     },
-    // ratings: [
-    //   {
-    //     star: Number,
-    //     postedBy: { type: ObjectId, ref: "User" },
-    //   },
-    // ],
+    ratings: [
+      {
+        star: Number,
+        postedBy: { type: ObjectId, ref: "User" },
+      },
+    ],
   },
   {
     timestamps: true,

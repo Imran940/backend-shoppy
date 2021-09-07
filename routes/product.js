@@ -11,13 +11,18 @@ const {
   list,
   getSubsCategory,
   getLimitedProducts,
+  getProductsCount,
+  updateRating,
 } = require("../controller/product");
 
 router.post("/product", checkUser, checkAdmin, create);
-router.get("/products/", list);
+router.get("/product/total", getProductsCount);
+router.post("/products/", list); // for pagination
 router.get("/products/:count", getLimitedProducts);
 router.get("/category/subs/:cid", getSubsCategory);
 router.get("/product/:slug", read);
 router.put("/product/:slug", checkUser, checkAdmin, update);
 router.delete("/product/:slug", checkUser, checkAdmin, remove);
+
+router.put("/product/star/:productId", checkUser, updateRating);
 module.exports = router;
