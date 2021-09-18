@@ -13,7 +13,7 @@ const {
 
 router.post("/category", checkUser, checkAdmin, create);
 router.get("/categories", list);
-router.get("/category/:slug", checkUser, checkAdmin, read);
+router.get("/category/:slug", read);
 router.put("/category/:slug", checkUser, checkAdmin, update);
 router.delete("/category/:slug", checkUser, checkAdmin, remove);
 module.exports = router;

@@ -113,6 +113,20 @@ exports.list = async (req, res) => {
   }
 };
 
+exports.listRelated = async (req, res) => {
+  const product = await Product.findById(req.params.productId).exec();
+  const related = await Product.find({
+    _id: { $ne: product._id },
+    category: product.category,
+  })
+    .limit(3)
+    .populate("category")
+    .populate("subs")
+    .populate("postedBy") // wants to send particular property .populate("postedBy","_id name")
+    .exec();
+
+  res.status(200).send(related);
+};
 exports.updateRating = async (req, res) => {
   const product = await Product.findById(req.params.productId).exec();
   const user = await User.findOne({ email: req.user.email }).exec();

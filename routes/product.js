@@ -13,6 +13,8 @@ const {
   getLimitedProducts,
   getProductsCount,
   updateRating,
+  listRelated,
+  getProductsByCid,
 } = require("../controller/product");
 
 router.post("/product", checkUser, checkAdmin, create);
@@ -25,4 +27,5 @@ router.put("/product/:slug", checkUser, checkAdmin, update);
 router.delete("/product/:slug", checkUser, checkAdmin, remove);
 
 router.put("/product/star/:productId", checkUser, updateRating);
+router.get("/product/related/:productId", listRelated);
 module.exports = router;

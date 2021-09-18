@@ -1,4 +1,5 @@
 const Category = require("../modals/category");
+const Product = require("../modals/product");
 const slugify = require("slugify");
 exports.create = async (req, res) => {
   const { name } = req.body;
@@ -18,14 +19,14 @@ exports.create = async (req, res) => {
   });
   console.log(category);
 };
-exports.read = (req, res) => {
-  Category.find({ slug: req.params.slug }, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    res.status(200).send(result);
+exports.read = async (req, res) => {
+  const category = await Category.find({ slug: req.params.slug }).exec();
+  const products = await Product.find({ category: category[0]._id }).exec();
+  res.json({
+    category,
+    products,
   });
+  console.log({ products, category });
 };
 exports.update = (req, res) => {
   const oldName = req.params.slug;
