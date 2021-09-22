@@ -1,4 +1,5 @@
 const Sub = require("../modals/sub");
+const Product = require("../modals/product");
 const slugify = require("slugify");
 const mongoose = require("mongoose");
 exports.create = async (req, res) => {
@@ -20,15 +21,13 @@ exports.create = async (req, res) => {
   });
   console.log(Sub);
 };
-exports.read = (req, res) => {
-  console.log(req.params.slug);
-  Sub.find({ slug: req.params.slug }, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log(result);
-    res.status(200).send(result);
+exports.read = async (req, res) => {
+  const sub = await Sub.find({ slug: req.params.slug }).exec();
+  const products = await Product.find({ selectedSubs: sub[0]._id }).exec();
+  console.log({ products, sub });
+  res.json({
+    sub,
+    products,
   });
 };
 exports.update = async (req, res) => {

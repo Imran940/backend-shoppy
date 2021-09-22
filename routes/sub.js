@@ -7,7 +7,7 @@ const { create, read, update, remove, list } = require("../controller/sub");
 
 router.post("/sub", checkUser, checkAdmin, create);
 router.get("/subs", list);
-router.get("/sub/:slug", checkUser, checkAdmin, read);
+router.get("/sub/:slug", read);
 router.put("/sub/:slug", checkUser, checkAdmin, update);
 router.delete("/sub/:slug", checkUser, checkAdmin, remove);
 module.exports = router;

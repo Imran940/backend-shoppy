@@ -15,6 +15,7 @@ const {
   updateRating,
   listRelated,
   getProductsByCid,
+  searchAndFilterProducts,
 } = require("../controller/product");
 
 router.post("/product", checkUser, checkAdmin, create);
@@ -28,4 +29,7 @@ router.delete("/product/:slug", checkUser, checkAdmin, remove);
 
 router.put("/product/star/:productId", checkUser, updateRating);
 router.get("/product/related/:productId", listRelated);
+
+//SEARCH AND FILTER
+router.post("/product/filter", searchAndFilterProducts);
 module.exports = router;
