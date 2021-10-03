@@ -12,6 +12,7 @@ exports.create = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+  c;
 };
 
 exports.getSubsCategory = (req, res) => {
@@ -167,16 +168,112 @@ exports.updateRating = async (req, res) => {
 const handleQuery = async (req, res, query) => {
   const products = await Product.find({ $text: { $search: query } })
     .populate("category", "_id name")
-    .populate("subs", "_id name")
+    .populate("selectedSubs", "_id name")
     .populate("postedBy", "_id name")
     .exec();
   res.json(products);
 };
 
+const handlePriceQuery = async (req, res, price) => {
+  try {
+    const products = await Product.find({
+      price: {
+        $gte: price[0],
+        $lte: price[1],
+      },
+    })
+      .populate("category", "_id name")
+      .populate("selectedSubs", "_id name")
+      .populate("postedBy", "_id name")
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log("priceQueryError", err);
+  }
+};
+
+const handleQuerySubs = async (req, res, subs) => {
+  const products = await Product.find({ selectedSubs: subs })
+    .populate("category", "_id name")
+    .populate("selectedSubs", "_id name")
+    .populate("postedBy", "_id name")
+    .exec();
+  res.json(products);
+};
+//ceil and floor ->floor(2.45)->2 and ceil(2.45)->3
+const handleStarRating = (req, res, stars) => {
+  Product.aggregate([
+    {
+      $project: {
+        document: "$$ROOT",
+        floorAverage: {
+          $floor: { $avg: "$ratings.star" },
+        },
+      },
+    },
+    { $match: { floorAverage: stars } },
+  ])
+    .limit(12)
+    .exec((err, result) => {
+      if (err) console.log(err);
+      console.log(result);
+      Product.find({ _id: result })
+        .populate("category", "_id name")
+        .populate("selectedSubs", "_id name")
+        .populate("postedBy", "_id name")
+        .exec((err, products) => {
+          if (err) {
+            console.log(err);
+            res.status(500).send(err.message);
+          }
+          res.json(products);
+        });
+    });
+};
+
+const handleQueryFilter = async (req, res, fieldName, fieldValue) => {
+  try {
+    console.log({ fieldName, fieldValue });
+    const products = await Product.find({ [fieldName]: fieldValue })
+      .populate("category", "_id name")
+      .populate("selectedSubs", "_id name")
+      .populate("postedBy", "_id name")
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log("CategoryError", err);
+  }
+};
 exports.searchAndFilterProducts = async (req, res) => {
-  const { query } = req.body;
+  const { query, price, category, stars, color, brand, subs, shipping } =
+    req.body;
   if (query) {
     console.log("query", query);
     await handleQuery(req, res, query);
+  }
+  if (price) {
+    console.log(price);
+    await handlePriceQuery(req, res, price);
+  }
+  if (category) {
+    console.log(category);
+    await handleQueryFilter(req, res, "category", category);
+  }
+  if (subs) {
+    console.log(subs);
+    await handleQuerySubs(req, res, subs);
+  }
+  if (color) {
+    await handleQueryFilter(req, res, "color", color);
+  }
+  if (brand) {
+    await handleQueryFilter(req, res, "brand", brand);
+  }
+  if (shipping) {
+    await handleQueryFilter(req, res, "shipping", shipping);
+  }
+  if (stars) {
+    console.log(stars);
+    await handleStarRating(req, res, stars);
   }
 };
