@@ -23,7 +23,7 @@ mongoose
 //app middlewares
 app.use(cors());
 app.use(morgan());
-app.use(bodyParser.json({ limit: "2mb" }));
+app.use(express.json());
 app.use(
   "/api",
   readdirSync("./routes").map((r) => require("./routes/" + r))
