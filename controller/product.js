@@ -52,7 +52,7 @@ exports.read = (req, res) => {
       return;
     }
     console.log(result);
-    res.status(200).send(result);
+    res.status(200).send(result?.length ? result[0] : result);
   })
     .populate("category")
     .populate("subs");

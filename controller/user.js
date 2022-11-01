@@ -117,35 +117,43 @@ exports.applyCoupon = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  const { paymentIntent } = req.body.stripeResponse;
-  const user = await User.findOne({ email: req.user.email }).exec();
-  let { products } = await Cart.findOne({ orderdBy: user._id }).exec();
+  try {
+    const { paymentIntent } = req.body.stripeResponse;
+    const user = await User.findOne({ email: req.user.email }).exec();
+    let { products } = await Cart.findOne({ orderdBy: user._id }).exec();
 
-  let order = await new Order({
-    paymentIntent,
-    products,
-    orderdBy: user._id,
-  }).save();
+    let order = await new Order({
+      paymentIntent,
+      products,
+      orderdBy: user._id,
+    }).save();
 
-  //decreament and increment
-  let bulkOption = products?.map((item) => {
-    return {
-      updateOne: {
-        filter: { _id: item.product._id },
-        update: { $inc: { quantity: -item.count, sold: +item.count } },
-      },
-    };
-  });
-  let updated = await Product.bulkWrite(bulkOption, {});
-  console.log({ updated });
-  res.json({ ok: true });
+    //decreament and increment
+    let bulkOption = products?.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: { quantity: -item.count, sold: +item.count } },
+        },
+      };
+    });
+    let updated = await Product.bulkWrite(bulkOption, {});
+    console.log({ updated });
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("something wents wrong");
+  }
+  
 };
 
 exports.fetchAllUserOrders = async (req, res) => {
   const user = await User.findOne({ email: req.user.email }).exec();
   const orders = await Order.find({ orderdBy: user._id })
+    .sort("-createdAt")
     .populate("products.product")
     .exec();
+    
   console.log(orders);
   res.json(orders);
 };
