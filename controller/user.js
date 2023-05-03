@@ -5,49 +5,57 @@ const Order = require("../modals/order");
 const Coupon = require("../modals/coupon");
 
 exports.saveCartInfo = async (req, res) => {
-  const { cart } = req.body;
+  try {
+    const { cart } = req.body;
 
-  let products = [];
+    let products = [];
 
-  const user = await User.findOne({ email: req.user.email }).exec();
+    const user = await User.findOne({ email: req.user.email }).exec();
 
-  let cartExistByUser = await Cart.findOne({ orderdBy: user._id }).exec();
-  if (cartExistByUser) {
-    cartExistByUser.remove();
-    console.log("cart removed");
+    let cartExistByUser = await Cart.findOne({ orderdBy: user._id }).exec();
+    if (cartExistByUser) {
+      cartExistByUser.remove();
+      console.log("cart removed");
+    }
+
+    for (let i = 0; i < cart.length; i++) {
+      let object = {};
+      object.product = cart[i]._id;
+      object.count = cart[i].count;
+      object.color = cart[i].color;
+
+      let { price } = await Product.findById(cart[i]._id)
+        .select("price")
+        .exec();
+      object.price = price;
+      products.push(object);
+    }
+
+    let cartTotal = 0;
+    for (let i = 0; i < products.length; i++) {
+      cartTotal = cartTotal + products[i].price * products[i].count;
+    }
+
+    console.log(cartTotal);
+
+    let newCart = await new Cart({
+      products,
+      cartTotal,
+      orderdBy: user._id,
+    }).save();
+
+    console.log("new cart", newCart);
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("something wents wrong");
   }
-
-  for (let i = 0; i < cart.length; i++) {
-    let object = {};
-    object.product = cart[i]._id;
-    object.count = cart[i].count;
-    object.color = cart[i].color;
-
-    let { price } = await Product.findById(cart[i]._id).select("price").exec();
-    object.price = price;
-    products.push(object);
-  }
-
-  let cartTotal = 0;
-  for (let i = 0; i < products.length; i++) {
-    cartTotal = cartTotal + products[i].price * products[i].count;
-  }
-
-  console.log(cartTotal);
-
-  let newCart = await new Cart({
-    products,
-    cartTotal,
-    orderdBy: user._id,
-  }).save();
-
-  console.log("new cart", newCart);
-  res.status(201).json({ ok: true });
 };
 
 exports.getCartInfo = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.user.email }).exec();
+    console.log({ user });
     let cart = await Cart.findOne({ orderdBy: user._id })
       .populate("products.product")
       .exec();

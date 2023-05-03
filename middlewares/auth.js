@@ -3,7 +3,6 @@ const User = require("../modals/user");
 exports.checkUser = async (req, res, next) => {
   try {
     const token = req.headers.authtoken;
-    console.log(token);
     const user = await admin.auth().verifyIdToken(token);
     req.user = user;
     next();
